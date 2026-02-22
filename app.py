@@ -69,6 +69,15 @@ def health_check():
     })
 
 
+@app.route('/api/records', methods=['GET'])
+def get_records():
+    records = Record.query.all()
+    records_list = [record.to_dict() for record in records]
+    return jsonify({
+        "records": records_list,
+        "total": len(records_list)
+    }), 200
+    
 @app.route('/api/records/<int:record_id>', methods=['PUT'])
 def update_record(record_id):
     """Update record by ID."""
