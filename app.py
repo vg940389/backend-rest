@@ -1,3 +1,14 @@
+@app.route('/api/records', methods=['GET'])
+def get_records():
+    """Get all records."""
+    records = Record.query.all()
+    records_list = [record.to_dict() for record in records]
+    return jsonify({
+        "records": records_list,
+        "total": len(records_list)
+    }), 200
+
+
 """Flask API application for managing records."""
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify
@@ -32,17 +43,12 @@ class Record(db.Model):
                            default=lambda: datetime.now(timezone.utc),
                            onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self):
-        """Convert object to dictionary for JSON serialization."""
+    def to_minimal_dict(self):
+        """Return only the required fields."""
         return {
-            'id': self.id,
             'name': self.name,
             'message': self.message,
-            'note': self.note,
-            'created_at': (self.created_at.isoformat()
-                           if self.created_at else None),
-            'updated_at': (self.updated_at.isoformat()
-                           if self.updated_at else None)
+            'note': self.note
         }
 
     def update_from_dict(self, data):
@@ -73,7 +79,7 @@ def health_check():
 def get_records():
     """Get all records."""
     records = Record.query.all()
-    records_list = [record.to_dict() for record in records]
+    records_list = [record.to_minimal_dict() for record in records]
     return jsonify({
         "records": records_list,
         "total": len(records_list)
@@ -106,7 +112,7 @@ def create_record():
         
         return jsonify({
             'message': 'Record created successfully',
-            'record': new_record.to_dict()
+            'record': new_record.to_minimal_dict()
         }), 201
     
     except (SQLAlchemyError, ValueError) as database_error:
@@ -132,7 +138,7 @@ def update_record(record_id):
 
         return jsonify({
             'message': 'Record updated successfully',
-            'record': record.to_dict()
+            'record': record.to_minimal_dict()
         }), 200
 
     except (SQLAlchemyError, ValueError) as database_error:
