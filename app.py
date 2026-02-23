@@ -34,7 +34,7 @@ class Record(db.Model):
                            default=lambda: datetime.now(timezone.utc),
                            onupdate=lambda: datetime.now(timezone.utc))
 
-     def to_minimal_dict(self):
+    def to_minimal_dict(self):
         return OrderedDict([
             ('name', self.name),
             ('message', self.message),
