@@ -71,12 +71,49 @@ def health_check():
 
 @app.route('/api/records', methods=['GET'])
 def get_records():
+    """Get all records."""
     records = Record.query.all()
     records_list = [record.to_dict() for record in records]
     return jsonify({
         "records": records_list,
         "total": len(records_list)
     }), 200
+
+@app.route('/api/records', methods=['POST'])
+def create_record():
+    """Create a new record."""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Validate required fields
+        if not data.get('name') or not data.get('message'):
+            return jsonify({
+                'error': 'Missing required fields: name and message'
+            }), 400
+        
+        # Create new record
+        new_record = Record(
+            name=data['name'].strip(),
+            message=data['message'].strip(),
+            note=data.get('note', '').strip() if data.get('note') else None
+        )
+        
+        db.session.add(new_record)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Record created successfully',
+            'record': new_record.to_dict()
+        }), 201
+    
+    except (SQLAlchemyError, ValueError) as database_error:
+        db.session.rollback()
+        return jsonify({
+            'error': f'Failed to create record: {str(database_error)}'
+        }), 500
     
 @app.route('/api/records/<int:record_id>', methods=['PUT'])
 def update_record(record_id):
