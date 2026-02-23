@@ -1,14 +1,3 @@
-@app.route('/api/records', methods=['GET'])
-def get_records():
-    """Get all records."""
-    records = Record.query.all()
-    records_list = [record.to_dict() for record in records]
-    return jsonify({
-        "records": records_list,
-        "total": len(records_list)
-    }), 200
-
-
 """Flask API application for managing records."""
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify
