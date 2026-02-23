@@ -5,6 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy.exc import SQLAlchemyError
 from config import Config
+from collections import OrderedDict
+
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -32,13 +34,12 @@ class Record(db.Model):
                            default=lambda: datetime.now(timezone.utc),
                            onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_minimal_dict(self):
-        """Return only the required fields."""
-        return {
-            'name': self.name,
-            'message': self.message,
-            'note': self.note
-        }
+     def to_minimal_dict(self):
+        return OrderedDict([
+            ('name', self.name),
+            ('message', self.message),
+            ('note', self.note)
+        ])
 
     def update_from_dict(self, data):
         """Update record fields from dictionary."""
