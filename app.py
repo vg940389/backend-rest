@@ -36,9 +36,12 @@ class Record(db.Model):
 
     def to_minimal_dict(self):
         return OrderedDict([
+            ('id', self.id),
             ('name', self.name),
             ('message', self.message),
-            ('note', self.note)
+            ('note', self.note),
+            ('createdAt', self.created_at.isoformat() if self.created_at else None),
+            ('updatedAt', self.updated_at.isoformat() if self.updated_at else None)
         ])
 
     def update_from_dict(self, data):
@@ -67,8 +70,8 @@ def health_check():
 
 @app.route('/api/records', methods=['GET'])
 def get_records():
-    """Get all records."""
-    records = Record.query.all()
+    """Get all records, ordered from newest to oldest."""
+    records = Record.query.order_by(Record.created_at.desc()).all()
     records_list = [record.to_minimal_dict() for record in records]
     return jsonify({
         "records": records_list,
