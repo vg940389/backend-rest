@@ -35,13 +35,18 @@ class Record(db.Model):
                            onupdate=lambda: datetime.now(timezone.utc))
 
     def to_minimal_dict(self):
+        def format_datetime(dt):
+            if not dt:
+                return None
+            # Format to ISO 8601 with milliseconds and 'Z' for UTC
+            return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         return OrderedDict([
             ('id', self.id),
             ('name', self.name),
             ('message', self.message),
             ('note', self.note),
-            ('createdAt', self.created_at.isoformat() if self.created_at else None),
-            ('updatedAt', self.updated_at.isoformat() if self.updated_at else None)
+            ('createdAt', format_datetime(self.created_at)),
+            ('updatedAt', format_datetime(self.updated_at))
         ])
 
     def update_from_dict(self, data):
